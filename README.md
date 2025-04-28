@@ -7,7 +7,7 @@ Also you can use command line parameters, example:
 **--fileMode=1** *chooses first method to work with configuration file, 0 to disable config file, different methods from 1 to 4*
 
 ## Build
-Requires dependencies: gdi32, (kernel32), user32, (comctl32).
+Requires dependencies: gdi32, (kernel32), user32, (comctl32).  
 You can build by using your build system.
 ```
 mkdir build
