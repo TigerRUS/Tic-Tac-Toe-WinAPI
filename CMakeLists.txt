@@ -5,7 +5,8 @@ project(Tic-Tac-Toe
 
 add_executable(Tic-Tac-Toe
 	src/main.cpp
-	src/Settings.cpp)
+	src/Settings.cpp
+	src/Settings.h)
 
 if(MSVC)
     set_target_properties(Tic-Tac-Toe PROPERTIES
