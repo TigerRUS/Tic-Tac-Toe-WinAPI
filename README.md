@@ -8,13 +8,13 @@ Also you can use command line parameters, example:
 
 ## Build
 Requires dependencies: gdi32, (kernel32), user32, (comctl32).  
-You can build by using your build system.
+
 ```
 mkdir build
 
 cd build
 
-cmake -G "<your build system>" ..
+cmake -G "<build system>" ..
 
 cmake --build . --config Debug --target Tic-Tac-Toe
 
