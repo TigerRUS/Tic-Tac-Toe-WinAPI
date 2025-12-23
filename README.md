@@ -20,7 +20,7 @@ mkdir build
 
 cd build
 
-cmake -G "<your build system>" ..
+cmake .. -G "<your build system>"
 
 cmake --build . --config Debug --target Tic-Tac-Toe
 
