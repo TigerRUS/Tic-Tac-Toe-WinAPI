@@ -6,7 +6,7 @@ There are command line parameters, example:
 **--fieldSize=23** *sets field size to 23x23*  
 **--fileMode=1** *chooses first method to work with configuration file, 0 to disable config file, different methods from 1 to 4*
 
-## Keybinds
+## Keyboard Shortcuts
 **Space**: start/stop gradient background
 **Enter**: change background color
 **Scroll wheel**: smoothly change grid color
