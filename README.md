@@ -7,10 +7,10 @@ There are command line parameters, example:
 **--fileMode=1** *chooses first method to work with configuration file, 0 to disable config file, different methods from 1 to 4*
 
 ## Keyboard Shortcuts
-**Space**: start/stop gradient background
-**Enter**: change background color
-**Scroll wheel**: smoothly change grid color
-**Ctrl + Q**: close app
+**Space**: start/stop gradient background  
+**Enter**: change background color  
+**Scroll wheel**: smoothly change grid color  
+**Ctrl + Q**: close app  
 
 ## Build
 Requires dependencies: gdi32, (kernel32), user32, (comctl32).  
