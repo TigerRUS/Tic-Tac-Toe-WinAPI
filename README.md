@@ -22,4 +22,5 @@ cmake --build . --config Debug --target Tic-Tac-Toe
 
 or you can launch .bat file to use Microsoft Visual Studio 2022 build system
 
+## App
 ![app](example.png)
