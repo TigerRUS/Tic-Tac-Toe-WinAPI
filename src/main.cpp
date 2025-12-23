@@ -342,7 +342,7 @@ void CheckWinner2()
     if (win)
     {
         WaitForSingleObject(blockWindow, INFINITE);
-        MessageBox(hwnd, _T("Сrosses won!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
+        MessageBox(hwnd, _T("Crosses won!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
         PostMessage(HWND_BROADCAST, closeMessage, 0, 0);
     }
 }

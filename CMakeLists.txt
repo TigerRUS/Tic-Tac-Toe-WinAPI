@@ -10,7 +10,12 @@ add_executable(Tic-Tac-Toe
 
 if(MSVC)
     set_target_properties(Tic-Tac-Toe PROPERTIES
-        LINK_FLAGS "/ENTRY:mainCRTStartup /SUBSYSTEM:WINDOWS")
+        LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+    )
+elseif(MINGW)
+    set_target_properties(Tic-Tac-Toe PROPERTIES
+        LINK_FLAGS "-mwindows"
+    )
 endif()
 
 

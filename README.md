@@ -20,13 +20,11 @@ mkdir build
 
 cd build
 
-cmake .. -G "<your build system>"
+cmake ..
 
-cmake --build . --config Debug --target Tic-Tac-Toe
+cmake --build .
 
 ```
-
-or you can launch .bat file to use Microsoft Visual Studio 2022 build system
 
 ## App
 ![app](example.png)
