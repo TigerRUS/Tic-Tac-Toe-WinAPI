@@ -6,6 +6,12 @@ There are command line parameters, example:
 **--fieldSize=23** *sets field size to 23x23*  
 **--fileMode=1** *chooses first method to work with configuration file, 0 to disable config file, different methods from 1 to 4*
 
+## Keybinds
+**Space**: start/stop gradient background
+**Enter**: change background color
+**Scroll wheel**: smoothly change grid color
+**Ctrl + Q**: close app
+
 ## Build
 Requires dependencies: gdi32, (kernel32), user32, (comctl32).  
 You can build by using your build system.

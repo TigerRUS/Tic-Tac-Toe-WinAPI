@@ -1,3 +1,10 @@
+/*
+ * Dependencies:
+ *  gdi32
+ *  (kernel32)
+ *  user32
+ *  (comctl32)
+ */
 #include "Settings.h"
 #include "tchar.h"
 
@@ -335,7 +342,7 @@ void CheckWinner2()
     if (win)
     {
         WaitForSingleObject(blockWindow, INFINITE);
-        MessageBox(hwnd, _T("Сrosses won!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
+        MessageBox(hwnd, _T("РЎrosses won!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
         PostMessage(HWND_BROADCAST, closeMessage, 0, 0);
     }
 }
@@ -359,7 +366,7 @@ void CheckGameover()
     if (count == settings.fieldSize * settings.fieldSize)
     {
         WaitForSingleObject(blockWindow, INFINITE);
-        MessageBox(hwnd, _T("А draw!!!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
+        MessageBox(hwnd, _T("Рђ draw!!!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
         PostMessage(HWND_BROADCAST, closeMessage, 0, 0);
     }
 }
@@ -557,15 +564,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         }
         else if (wParam == KEY_Q && (GetAsyncKeyState(VK_CONTROL) & KEY_SHIFTED))
             PostQuitMessage(0);
-        else if (wParam == VK_ESCAPE)
-            PostQuitMessage(0);
-        switch (wParam)
-        {
-        case KEY_1: SetThreadPriority(drawThread, THREAD_MODE_BACKGROUND_BEGIN); cout << drawThread; break;
-        case KEY_2: SetThreadPriority(drawThread, THREAD_PRIORITY_LOWEST); cout << GetThreadPriority(drawThread); break;
-        case KEY_3: SetThreadPriority(drawThread, THREAD_PRIORITY_NORMAL); cout << GetThreadPriority(drawThread); break;
-        case KEY_4: SetThreadPriority(drawThread, THREAD_PRIORITY_HIGHEST); cout << GetThreadPriority(drawThread); break;
-        }
         return 0;
     case WM_DESTROY:
         PostMessage(HWND_BROADCAST, closeMessage, 0, 0);
@@ -672,7 +670,7 @@ int main(int argc, char* argv[])
 
     if (ptrService->count > 2)
     {
-        MessageBox(NULL, _T("Нельзя создать более 2 окон"), _T("Tic_Tac_Toe"),
+        MessageBox(NULL, _T("You can open only 2 instances"), _T("Tic_Tac_Toe"),
             MB_OK | MB_SETFOREGROUND);
 
         UnmapViewOfFile(settings.arr);
