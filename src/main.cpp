@@ -366,7 +366,7 @@ void CheckGameover()
     if (count == settings.fieldSize * settings.fieldSize)
     {
         WaitForSingleObject(blockWindow, INFINITE);
-        MessageBox(hwnd, _T("А draw!!!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
+        MessageBox(hwnd, _T("A draw!!!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
         PostMessage(HWND_BROADCAST, closeMessage, 0, 0);
     }
 }
