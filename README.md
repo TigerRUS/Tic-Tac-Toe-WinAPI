@@ -13,7 +13,7 @@ There are command line parameters, example:
 **Ctrl + Q**: close app  
 
 ## Build
-Requires dependencies: gdi32, (kernel32), user32, (comctl32).  
+Requires dependencies: gdi32, user32, (kernel32).  
 You can build by using your build system.
 ```
 mkdir build

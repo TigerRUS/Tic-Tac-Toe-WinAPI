@@ -1,8 +1,8 @@
 /*
  * Dependencies:
  *  gdi32
- *  (kernel32)
  *  user32
+ *  (kernel32)
  *  (comctl32)
  */
 #include "Settings.h"
