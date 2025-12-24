@@ -8,8 +8,8 @@ using namespace std;
 
 #define KEY_Q     0x51
 
-#define CIRCLES 0
-#define CROSSES 1
+#define CIRCLE 1
+#define CROSS 2
 
 const TCHAR szWinClass[] = _T("Win32SimpleApp");
 const TCHAR szWinName[] = _T("Tic_Tac_Toe");
@@ -35,7 +35,7 @@ struct Service
 Service* ptrService;
 Settings settings;
 
-int figure = CIRCLES; // first window will use circles
+int figure = CIRCLE; // first window will use circles
 
 /* gradient brash parameters */
 double gradientFirstParam = 1;
@@ -115,19 +115,19 @@ void DrawObjects()
     {
         for (int j = 0; j < settings.fieldSize; j++)
         {
-            if (lenX <= lenY && settings.arr[i * (int)settings.fieldSize + j] == 1)
+            if (lenX <= lenY && settings.arr[i * (int)settings.fieldSize + j] == CIRCLE)
             {
                 int oX = lenX * (i);
                 int oY = ((lenY - lenX) / 2) + lenY * (j);
                 Ellipse(hdc, rc.left + oX + 2, rc.top + oY + 2, rc.left + oX + lenX - 2, rc.top + oY + lenX - 2);
             }
-            else if (lenY <= lenX && settings.arr[i * (int)settings.fieldSize + j] == 1)
+            else if (lenY <= lenX && settings.arr[i * (int)settings.fieldSize + j] == CIRCLE)
             {
                 int oY = lenY * (j);
                 int oX = ((lenX - lenY) / 2) + lenX * (i);
                 Ellipse(hdc, rc.left + oX + 2, rc.top + oY + 2, rc.left + oX + lenY - 2, rc.top + oY + lenY - 2);
             }
-            else if (lenX <= lenY && settings.arr[i * (int)settings.fieldSize + j] == 2)
+            else if (lenX <= lenY && settings.arr[i * (int)settings.fieldSize + j] == CROSS)
             {
                 int oX = lenX * (i);
                 int oY = ((lenY - lenX) / 2) + lenY * (j);
@@ -136,7 +136,7 @@ void DrawObjects()
                 MoveToEx(hdc, rc.left + oX + lenX, rc.top + oY, (LPPOINT)NULL);
                 LineTo(hdc, rc.left + oX, rc.top + oY + lenX);
             }
-            else if (lenY <= lenX && settings.arr[i * (int)settings.fieldSize + j] == 2)
+            else if (lenY <= lenX && settings.arr[i * (int)settings.fieldSize + j] == CROSS)
             {
                 int oY = lenY * (j);
                 int oX = ((lenX - lenY) / 2) + lenX * (i);
@@ -173,7 +173,7 @@ bool DrawEllipse(LPARAM lParam)
 
     if (settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] == 0)
     {
-        settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] = 1;
+        settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] = CIRCLE;
 
         if (lenX <= lenY)
         {
@@ -218,7 +218,7 @@ bool DrawCross(LPARAM lParam)
 
     if (settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] == 0)
     {
-        settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] = 2;
+        settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] = CROSS;
 
         if (lenX <= lenY)
         {
@@ -249,7 +249,7 @@ bool DrawCross(LPARAM lParam)
     return created;
 }
 
-void CheckWinner1()
+void CheckWinnerCircles()
 {
     int line = 0;
     int column = 0;
@@ -262,25 +262,25 @@ void CheckWinner1()
     {
         for (int j = 0; j < settings.fieldSize; j++)
         {
-            if (settings.arr[i * (int)settings.fieldSize + j] == 1)
-                column++;
-            if (settings.arr[j * (int)settings.fieldSize + i] == 1)
-                line++;
+            column += (settings.arr[i * (int)settings.fieldSize + j] == CIRCLE);
+            line += (settings.arr[j * (int)settings.fieldSize + i] == CIRCLE);
+
             if (column == settings.fieldSize || line == settings.fieldSize)
             {
                 win = TRUE;
                 break;
             }
         }
-        if (settings.arr[i * (int)settings.fieldSize + i] == 1)
-            count++;
-        if (settings.arr[i * (int)settings.fieldSize + ((int)settings.fieldSize - 1 - i)] == 1)
-            count2++;
+
+        count += (settings.arr[i * (int)settings.fieldSize + i] == CIRCLE);
+        count2 += (settings.arr[i * (int)settings.fieldSize + ((int)settings.fieldSize - 1 - i)] == CIRCLE);
+
         if (count == settings.fieldSize || count2 == settings.fieldSize)
         {
             win = TRUE;
             break;
         }
+
         column = 0;
         line = 0;
     }
@@ -293,7 +293,7 @@ void CheckWinner1()
     }
 }
 
-void CheckWinner2()
+void CheckWinnerCrosses()
 {
     int line = 0;
     int column = 0;
@@ -306,25 +306,25 @@ void CheckWinner2()
     {
         for (int j = 0; j < settings.fieldSize; j++)
         {
-            if (settings.arr[i * (int)settings.fieldSize + j] == 2)
-                column++;
-            if (settings.arr[j * (int)settings.fieldSize + i] == 2)
-                line++;
+            column += (settings.arr[i * (int)settings.fieldSize + j] == CROSS);
+            line += (settings.arr[j * (int)settings.fieldSize + i] == CROSS);
+
             if (column == settings.fieldSize || line == settings.fieldSize)
             {
                 win = TRUE;
                 break;
             }
         }
-        if (settings.arr[i * (int)settings.fieldSize + i] == 2)
-            count++;
-        if (settings.arr[i * (int)settings.fieldSize + ((int)settings.fieldSize - 1 - i)] == 2)
-            count2++;
+
+        count += (settings.arr[i * (int)settings.fieldSize + i] == CROSS);
+        count2 += (settings.arr[i * (int)settings.fieldSize + ((int)settings.fieldSize - 1 - i)] == CROSS);
+
         if (count == settings.fieldSize || count2 == settings.fieldSize)
         {
             win = TRUE;
             break;
         }
+
         column = 0;
         line = 0;
     }
@@ -339,8 +339,8 @@ void CheckWinner2()
 
 void CheckGameover()
 {
-    CheckWinner1();
-    CheckWinner2();
+    CheckWinnerCircles();
+    CheckWinnerCrosses();
 
     int count = 0;
 
@@ -348,8 +348,7 @@ void CheckGameover()
     {
         for (int j = 0; j < settings.fieldSize; j++)
         {
-            if (settings.arr[i * (int)settings.fieldSize + j] != 0)
-                count++;
+            count += (settings.arr[i * (int)settings.fieldSize + j] != 0);
         }
     }
 
@@ -480,11 +479,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
         if (ptrService->move == figure)
         {
-            if (figure == CIRCLES)
+            if (figure == CIRCLE)
             {
                 if (DrawEllipse(lParam))
                 {
-                    ptrService->move = CROSSES;
+                    ptrService->move = CROSS;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
                 }
             }
@@ -492,7 +491,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
             {
                 if (DrawCross(lParam))
                 {
-                    ptrService->move = CIRCLES;
+                    ptrService->move = CIRCLE;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
                 }
             }
@@ -509,11 +508,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
         if (ptrService->move == figure)
         {
-            if (figure == CIRCLES)
+            if (figure == CIRCLE)
             {
                 if (DrawEllipse(lParam))
                 {
-                    ptrService->move = CROSSES;
+                    ptrService->move = CROSS;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
                 }
             }
@@ -521,7 +520,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
             {
                 if (DrawCross(lParam))
                 {
-                    ptrService->move = CIRCLES;
+                    ptrService->move = CIRCLE;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
                 }
             }
@@ -642,7 +641,7 @@ int main(int argc, char* argv[])
         }
 
         ptrService->count = 1;
-        ptrService->move = CIRCLES;
+        ptrService->move = CIRCLE;
     }
     else
     {
@@ -666,7 +665,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    figure = ptrService->count - 1;
+    figure = ptrService->count;
 
     srand(time(0));
 
