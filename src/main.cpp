@@ -6,13 +6,7 @@ using namespace std;
 #define KEY_SHIFTED     0x8000
 #define KEY_TOGGLED     0x0001
 
-#define KEY_C     0x43
 #define KEY_Q     0x51
-
-#define KEY_1     0x31
-#define KEY_2     0x32
-#define KEY_3     0x33
-#define KEY_4     0x34
 
 const TCHAR szWinClass[] = _T("Win32SimpleApp");
 const TCHAR szWinName[] = _T("Tic_Tac_Toe");
