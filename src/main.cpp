@@ -1,10 +1,3 @@
-/*
- * Dependencies:
- *  gdi32
- *  user32
- *  (kernel32)
- *  (comctl32)
- */
 #include "Settings.h"
 #include "tchar.h"
 
@@ -23,8 +16,8 @@ using namespace std;
 
 const TCHAR szWinClass[] = _T("Win32SimpleApp");
 const TCHAR szWinName[] = _T("Tic_Tac_Toe");
-HWND hwnd;               // window handle
-HBRUSH hBrush;           // current brush handle
+HWND hwnd;
+HBRUSH hBrush;
 
 UINT myMessage = RegisterWindowMessageW(L"MyMessage");
 UINT closeMessage = RegisterWindowMessageW(L"Win");
@@ -33,7 +26,7 @@ HANDLE drawThread;
 HANDLE startDraw;
 BOOL gradientIsDrawing = FALSE;
 
-HANDLE blockWindow;  // mutex to block a window
+HANDLE blockWindow;
 
 /* service info to write into shared memory */
 struct Service
@@ -298,7 +291,7 @@ void CheckWinner1()
     if (win)
     {
         WaitForSingleObject(blockWindow, INFINITE);
-        MessageBox(hwnd, _T("Circles won!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
+        MessageBox(hwnd, _T("Circles won!"), _T("Gameover"), MB_SETFOREGROUND);
         PostMessage(HWND_BROADCAST, closeMessage, 0, 0);
     }
 }
@@ -342,7 +335,7 @@ void CheckWinner2()
     if (win)
     {
         WaitForSingleObject(blockWindow, INFINITE);
-        MessageBox(hwnd, _T("Crosses won!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
+        MessageBox(hwnd, _T("Crosses won!"), _T("Gameover"), MB_SETFOREGROUND);
         PostMessage(HWND_BROADCAST, closeMessage, 0, 0);
     }
 }
@@ -366,7 +359,7 @@ void CheckGameover()
     if (count == settings.fieldSize * settings.fieldSize)
     {
         WaitForSingleObject(blockWindow, INFINITE);
-        MessageBox(hwnd, _T("A draw!!!"), _T("Gameover"), MB_ICONEXCLAMATION | MB_SETFOREGROUND);
+        MessageBox(hwnd, _T("A draw!!!"), _T("Gameover"), MB_SETFOREGROUND);
         PostMessage(HWND_BROADCAST, closeMessage, 0, 0);
     }
 }
@@ -452,7 +445,6 @@ DWORD WINAPI DrawBackground(void* lParam) {
     return 0;
 }
 
-/*  This function is called by the Windows function DispatchMessage()  */
 LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     RECT rc;
@@ -510,7 +502,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
             CheckGameover();
         }
         else
-            MessageBox(hwnd, _T("Another player's move"), _T("Notice"), MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_APPLMODAL);
+            MessageBox(hwnd, _T("Another player's move"), _T("Notice"), MB_OK | MB_SETFOREGROUND | MB_APPLMODAL);
         ReleaseMutex(blockWindow);
         return 0;
     case WM_RBUTTONUP:
@@ -539,7 +531,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
             CheckGameover();
         }
         else
-            MessageBox(hwnd, _T("Another player's move"), _T("Notice"), MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_APPLMODAL);
+            MessageBox(hwnd, _T("Another player's move"), _T("Notice"), MB_OK | MB_SETFOREGROUND | MB_APPLMODAL);
         ReleaseMutex(blockWindow);
         return 0;
     case WM_MOUSEWHEEL:
@@ -567,19 +559,18 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         return 0;
     case WM_DESTROY:
         PostMessage(HWND_BROADCAST, closeMessage, 0, 0);
-        PostQuitMessage(0);       /* send a WM_QUIT to the message queue */
+        PostQuitMessage(0);
         return 0;
     }
 
-    /* for messages that we don't deal with */
     return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
 int main(int argc, char* argv[])
 {
     BOOL bMessageOk;
-    MSG message;                    // message to the application are saved=
-    WNDCLASS wincl = { 0 };         // Data structure for the windowclass=
+    MSG message;
+    WNDCLASS wincl = { 0 };
 
     int fileMode = 0;  // default parameter to config file mode (0 to disable configuration saving)
 
@@ -681,42 +672,35 @@ int main(int argc, char* argv[])
 
     srand(time(0));
 
-    /* Harcode show command num when use non-winapi entrypoint */
     int nCmdShow = SW_SHOW;
 
     HINSTANCE hThisInstance = GetModuleHandle(NULL);
 
-    /* The Window structure */
     wincl.hInstance = hThisInstance;
     wincl.lpszClassName = szWinClass;
-    wincl.lpfnWndProc = WindowProcedure;      // This function is called by Windows
+    wincl.lpfnWndProc = WindowProcedure;
 
-    /* Use custom brush to paint the background of the window */
     hBrush = CreateSolidBrush(settings.BGColor);
     wincl.hbrBackground = hBrush;
 
-    /* Register the window class, and if it fails quit the program */
     if (!RegisterClass(&wincl))
         return 0;
 
-    /* The window class */
     hwnd = CreateWindow(
-        szWinClass,             // Classname
-        szWinName,              // Title Text
-        WS_OVERLAPPEDWINDOW,    // default window
-        CW_USEDEFAULT,          // Windows decides the position
-        CW_USEDEFAULT,          // where the window ends up on the screen
-        settings.width,         // The programs width
-        settings.height,        // and height in pixels
-        HWND_DESKTOP,           // The window is a child-window to desktop
-        NULL,                   // No menu
-        hThisInstance,          // Program Instance handler
-        NULL                    // No Window Creation data
-    );
+        szWinClass,
+        szWinName,
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        settings.width,
+        settings.height,
+        HWND_DESKTOP,
+        NULL,
+        hThisInstance,
+        NULL);
 
     ShowWindow(hwnd, nCmdShow);
 
-    /* Thread of drawing background */
     drawThread = CreateThread(NULL, 0, DrawBackground, (void*)hwnd, 0, NULL);
     if (drawThread == NULL)
     {
@@ -736,7 +720,6 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    /* Run the message loop. It will run until GetMessage() returns 0 */
     while ((bMessageOk = GetMessage(&message, NULL, 0, 0)) != 0)
     {
         if (bMessageOk == -1)
@@ -744,12 +727,10 @@ int main(int argc, char* argv[])
             puts("Suddenly, GetMessage failed!");
             break;
         }
-        /* Translate virtual-key message into character message */
         TranslateMessage(&message);
         DispatchMessage(&message);
     }
 
-    /* Save Settings to file*/
     WriteConfigToFile(fileMode, &settings);
 
     /* Memory clean up */
