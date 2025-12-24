@@ -8,6 +8,9 @@ using namespace std;
 
 #define KEY_Q     0x51
 
+#define CIRCLES 0
+#define CROSSES 1
+
 const TCHAR szWinClass[] = _T("Win32SimpleApp");
 const TCHAR szWinName[] = _T("Tic_Tac_Toe");
 HWND hwnd;
@@ -32,9 +35,9 @@ struct Service
 Service* ptrService;
 Settings settings;
 
-int figure = 1; // first window will use Circles
+int figure = CIRCLES; // first window will use circles
 
-/* parameters for gradient brash */
+/* gradient brash parameters */
 double gradientFirstParam = 1;
 double gradientSecondParam = 250;
 double gradientRatio = 500;
@@ -477,11 +480,11 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
         if (ptrService->move == figure)
         {
-            if (figure == 1)
+            if (figure == CIRCLES)
             {
                 if (DrawEllipse(lParam))
                 {
-                    ptrService->move = 2;
+                    ptrService->move = CROSSES;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
                 }
             }
@@ -489,7 +492,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
             {
                 if (DrawCross(lParam))
                 {
-                    ptrService->move = 1;
+                    ptrService->move = CIRCLES;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
                 }
             }
@@ -506,19 +509,19 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
         if (ptrService->move == figure)
         {
-            if (figure == 2)
+            if (figure == CIRCLES)
             {
-                if (DrawCross(lParam))
+                if (DrawEllipse(lParam))
                 {
-                    ptrService->move = 1;
+                    ptrService->move = CROSSES;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
                 }
             }
             else
             {
-                if (DrawEllipse(lParam))
+                if (DrawCross(lParam))
                 {
-                    ptrService->move = 2;
+                    ptrService->move = CIRCLES;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
                 }
             }
@@ -639,7 +642,7 @@ int main(int argc, char* argv[])
         }
 
         ptrService->count = 1;
-        ptrService->move = 1;
+        ptrService->move = CIRCLES;
     }
     else
     {
@@ -662,7 +665,8 @@ int main(int argc, char* argv[])
         CloseHandle(hMapFile);
         return 0;
     }
-    figure = ptrService->count;
+
+    figure = ptrService->count - 1;
 
     srand(time(0));
 
