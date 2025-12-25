@@ -106,6 +106,7 @@ void DrawObjects()
     hdc = GetDC(hwnd);
 
     HPEN pen = CreatePen(PS_SOLID, 2, settings.objectColor);
+    HBRUSH hBrushOld = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
     SelectObject(hdc, pen);
 
     double lenX = (rc.right - rc.left) / settings.fieldSize;
@@ -119,54 +120,47 @@ void DrawObjects()
             {
                 int oX = lenX * (i);
                 int oY = ((lenY - lenX) / 2) + lenY * (j);
-                Ellipse(hdc, rc.left + oX + 2, rc.top + oY + 2, rc.left + oX + lenX - 2, rc.top + oY + lenX - 2);
+                Ellipse(hdc, rc.left + oX + 4, rc.top + oY + 4, rc.left + oX + lenX - 4, rc.top + oY + lenX - 4);
             }
-            else if (lenY <= lenX && settings.arr[i * (int)settings.fieldSize + j] == CIRCLE)
+            else if (lenY < lenX && settings.arr[i * (int)settings.fieldSize + j] == CIRCLE)
             {
                 int oY = lenY * (j);
                 int oX = ((lenX - lenY) / 2) + lenX * (i);
-                Ellipse(hdc, rc.left + oX + 2, rc.top + oY + 2, rc.left + oX + lenY - 2, rc.top + oY + lenY - 2);
+                Ellipse(hdc, rc.left + oX + 4, rc.top + oY + 4, rc.left + oX + lenY - 4, rc.top + oY + lenY - 4);
             }
             else if (lenX <= lenY && settings.arr[i * (int)settings.fieldSize + j] == CROSS)
             {
                 int oX = lenX * (i);
                 int oY = ((lenY - lenX) / 2) + lenY * (j);
-                MoveToEx(hdc, rc.left + oX, rc.top + oY, (LPPOINT)NULL);
-                LineTo(hdc, rc.left + oX + lenX, rc.top + oY + lenX);
-                MoveToEx(hdc, rc.left + oX + lenX, rc.top + oY, (LPPOINT)NULL);
-                LineTo(hdc, rc.left + oX, rc.top + oY + lenX);
+                MoveToEx(hdc, rc.left + oX + 4, rc.top + oY + 4, (LPPOINT)NULL);
+                LineTo(hdc, rc.left + oX + lenX - 4, rc.top + oY + lenX - 4);
+                MoveToEx(hdc, rc.left + oX + lenX - 4, rc.top + oY + 4, (LPPOINT)NULL);
+                LineTo(hdc, rc.left + oX + 4, rc.top + oY + lenX - 4);
             }
-            else if (lenY <= lenX && settings.arr[i * (int)settings.fieldSize + j] == CROSS)
+            else if (lenY < lenX && settings.arr[i * (int)settings.fieldSize + j] == CROSS)
             {
                 int oY = lenY * (j);
                 int oX = ((lenX - lenY) / 2) + lenX * (i);
-                MoveToEx(hdc, rc.left + oX, rc.top + oY, (LPPOINT)NULL);
-                LineTo(hdc, rc.left + oX + lenY, rc.top + oY + lenY);
-                MoveToEx(hdc, rc.left + oX + lenY, rc.top + oY, (LPPOINT)NULL);
-                LineTo(hdc, rc.left + oX, rc.top + oY + lenY);
+                MoveToEx(hdc, rc.left + oX + 4, rc.top + oY + 4, (LPPOINT)NULL);
+                LineTo(hdc, rc.left + oX + lenY - 4, rc.top + oY + lenY - 4);
+                MoveToEx(hdc, rc.left + oX + lenY - 4, rc.top + oY + 4, (LPPOINT)NULL);
+                LineTo(hdc, rc.left + oX + 4, rc.top + oY + lenY - 4);
             }
         }
     }
 
+    SelectObject(hdc, hBrushOld);
     DeleteObject(pen);
     EndPaint(hwnd, &ps);
     ReleaseDC(hwnd, hdc);
 }
 
-bool DrawEllipse(LPARAM lParam)
+bool SetEllipse(LPARAM lParam)
 {
-    HDC hdc;
-    PAINTSTRUCT ps;
     RECT rc;
-
-    GetClientRect(hwnd, &rc);
-    hdc = BeginPaint(hwnd, &ps);
-    hdc = GetDC(hwnd);
-
     bool created = FALSE;
 
-    HPEN pen = CreatePen(PS_SOLID, 2, settings.objectColor);
-    SelectObject(hdc, pen);
+    GetClientRect(hwnd, &rc);
 
     double lenX = (rc.right - rc.left) / settings.fieldSize;
     double lenY = (rc.bottom - rc.top) / settings.fieldSize;
@@ -175,43 +169,22 @@ bool DrawEllipse(LPARAM lParam)
     {
         settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] = CIRCLE;
 
-        if (lenX <= lenY)
-        {
-            int oX = lenX * (int)(LOWORD(lParam) / lenX);
-            int oY = ((lenY - lenX) / 2) + lenY * (int)(HIWORD(lParam) / lenY);
-            Ellipse(hdc, rc.left + oX + 2, rc.top + oY + 2, rc.left + oX + lenX - 2, rc.top + oY + lenX - 2);
-        }
-        else if (lenY <= lenX)
-        {
-            int oY = lenY * (int)(HIWORD(lParam) / lenY);
-            int oX = ((lenX - lenY) / 2) + lenX * (int)(LOWORD(lParam) / lenX);
-            Ellipse(hdc, rc.left + oX + 2, rc.top + oY + 2, rc.left + oX + lenY - 2, rc.top + oY + lenY - 2);
-        }
         created = TRUE;
     }
     else
+    {
         created = FALSE;
-
-    DeleteObject(pen);
-    EndPaint(hwnd, &ps);
+    }
 
     return created;
 }
 
-bool DrawCross(LPARAM lParam)
+bool SetCross(LPARAM lParam)
 {
-    HDC hdc;
-    PAINTSTRUCT ps;
     RECT rc;
+    bool created = FALSE;
 
     GetClientRect(hwnd, &rc);
-    hdc = BeginPaint(hwnd, &ps);
-    hdc = GetDC(hwnd);
-
-    HPEN pen = CreatePen(PS_SOLID, 2, settings.objectColor);
-    SelectObject(hdc, pen);
-
-    bool created = FALSE;
 
     double lenX = (rc.right - rc.left) / settings.fieldSize;
     double lenY = (rc.bottom - rc.top) / settings.fieldSize;
@@ -220,31 +193,12 @@ bool DrawCross(LPARAM lParam)
     {
         settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] = CROSS;
 
-        if (lenX <= lenY)
-        {
-            int oX = lenX * (int)(LOWORD(lParam) / lenX);
-            int oY = ((lenY - lenX) / 2) + lenY * (int)(HIWORD(lParam) / lenY);
-            MoveToEx(hdc, rc.left + oX, rc.top + oY, (LPPOINT)NULL);
-            LineTo(hdc, rc.left + oX + lenX, rc.top + oY + lenX);
-            MoveToEx(hdc, rc.left + oX + lenX, rc.top + oY, (LPPOINT)NULL);
-            LineTo(hdc, rc.left + oX, rc.top + oY + lenX);
-        }
-        else if (lenY <= lenX)
-        {
-            int oY = lenY * (int)(HIWORD(lParam) / lenY);
-            int oX = ((lenX - lenY) / 2) + lenX * (int)(LOWORD(lParam) / lenX);
-            MoveToEx(hdc, rc.left + oX, rc.top + oY, (LPPOINT)NULL);
-            LineTo(hdc, rc.left + oX + lenY, rc.top + oY + lenY);
-            MoveToEx(hdc, rc.left + oX + lenY, rc.top + oY, (LPPOINT)NULL);
-            LineTo(hdc, rc.left + oX, rc.top + oY + lenY);
-        }
         created = TRUE;
     }
     else
+    {
         created = FALSE;
-
-    DeleteObject(pen);
-    EndPaint(hwnd, &ps);
+    }
 
     return created;
 }
@@ -403,7 +357,7 @@ HBRUSH CreateGradientBrush(COLORREF top, COLORREF bottom)
 }
 
 uint32_t rgb(double ratio)
-{
+{   
     int normalized = int(ratio * 256 * 6);
     int region = normalized / 256;
     int x = normalized % 256;
@@ -481,7 +435,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         {
             if (figure == CIRCLE)
             {
-                if (DrawEllipse(lParam))
+                if (SetEllipse(lParam))
                 {
                     ptrService->move = CROSS;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
@@ -489,7 +443,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
             }
             else
             {
-                if (DrawCross(lParam))
+                if (SetCross(lParam))
                 {
                     ptrService->move = CIRCLE;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
@@ -510,7 +464,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         {
             if (figure == CIRCLE)
             {
-                if (DrawEllipse(lParam))
+                if (SetEllipse(lParam))
                 {
                     ptrService->move = CROSS;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
@@ -518,7 +472,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
             }
             else
             {
-                if (DrawCross(lParam))
+                if (SetCross(lParam))
                 {
                     ptrService->move = CIRCLE;
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
