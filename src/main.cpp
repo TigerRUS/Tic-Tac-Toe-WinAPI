@@ -67,16 +67,8 @@ void ChangeBGColor(short a, int R, int G, int B)
     InvalidateRect(hwnd, &rc, TRUE);
 }
 
-void DrawGrid()
+void DrawGrid(HDC hdc, RECT rc)
 {
-    HDC hdc;
-    PAINTSTRUCT ps;
-    RECT rc;
-
-    GetClientRect(hwnd, &rc);
-    hdc = BeginPaint(hwnd, &ps);
-    hdc = GetDC(hwnd);
-
     HPEN pen = CreatePen(PS_SOLID, 2, settings.gridColor);
     SelectObject(hdc, pen);
 
@@ -91,20 +83,10 @@ void DrawGrid()
     }
 
     DeleteObject(pen);
-    EndPaint(hwnd, &ps);
-    ReleaseDC(hwnd, hdc);
 }
 
-void DrawObjects()
+void DrawObjects(HDC hdc, RECT rc)
 {
-    HDC hdc;
-    PAINTSTRUCT ps;
-    RECT rc;
-
-    GetClientRect(hwnd, &rc);
-    hdc = BeginPaint(hwnd, &ps);
-    hdc = GetDC(hwnd);
-
     HPEN pen = CreatePen(PS_SOLID, 2, settings.objectColor);
     HBRUSH hBrushOld = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
     SelectObject(hdc, pen);
@@ -118,20 +100,20 @@ void DrawObjects()
         {
             if (lenX <= lenY && settings.arr[i * (int)settings.fieldSize + j] == CIRCLE)
             {
-                int oX = lenX * (i);
-                int oY = ((lenY - lenX) / 2) + lenY * (j);
+                int oX = lenX * i;
+                int oY = ((lenY - lenX) / 2) + lenY * j;
                 Ellipse(hdc, rc.left + oX + 4, rc.top + oY + 4, rc.left + oX + lenX - 4, rc.top + oY + lenX - 4);
             }
             else if (lenY < lenX && settings.arr[i * (int)settings.fieldSize + j] == CIRCLE)
             {
-                int oY = lenY * (j);
-                int oX = ((lenX - lenY) / 2) + lenX * (i);
+                int oY = lenY * j;
+                int oX = ((lenX - lenY) / 2) + lenX * i;
                 Ellipse(hdc, rc.left + oX + 4, rc.top + oY + 4, rc.left + oX + lenY - 4, rc.top + oY + lenY - 4);
             }
             else if (lenX <= lenY && settings.arr[i * (int)settings.fieldSize + j] == CROSS)
             {
-                int oX = lenX * (i);
-                int oY = ((lenY - lenX) / 2) + lenY * (j);
+                int oX = lenX * i;
+                int oY = ((lenY - lenX) / 2) + lenY * j;
                 MoveToEx(hdc, rc.left + oX + 4, rc.top + oY + 4, (LPPOINT)NULL);
                 LineTo(hdc, rc.left + oX + lenX - 4, rc.top + oY + lenX - 4);
                 MoveToEx(hdc, rc.left + oX + lenX - 4, rc.top + oY + 4, (LPPOINT)NULL);
@@ -139,8 +121,8 @@ void DrawObjects()
             }
             else if (lenY < lenX && settings.arr[i * (int)settings.fieldSize + j] == CROSS)
             {
-                int oY = lenY * (j);
-                int oX = ((lenX - lenY) / 2) + lenX * (i);
+                int oY = lenY * j;
+                int oX = ((lenX - lenY) / 2) + lenX * i;
                 MoveToEx(hdc, rc.left + oX + 4, rc.top + oY + 4, (LPPOINT)NULL);
                 LineTo(hdc, rc.left + oX + lenY - 4, rc.top + oY + lenY - 4);
                 MoveToEx(hdc, rc.left + oX + lenY - 4, rc.top + oY + 4, (LPPOINT)NULL);
@@ -151,8 +133,6 @@ void DrawObjects()
 
     SelectObject(hdc, hBrushOld);
     DeleteObject(pen);
-    EndPaint(hwnd, &ps);
-    ReleaseDC(hwnd, hdc);
 }
 
 bool SetEllipse(LPARAM lParam)
@@ -203,7 +183,7 @@ bool SetCross(LPARAM lParam)
     return created;
 }
 
-void CheckWinnerCircles()
+void CheckWinnerCircles(HDC hdc, RECT rc)
 {
     int line = 0;
     int column = 0;
@@ -212,6 +192,12 @@ void CheckWinnerCircles()
 
     bool win = FALSE;
 
+    HPEN pen = CreatePen(PS_SOLID, 4, settings.objectColor);
+    SelectObject(hdc, pen);
+
+    double lenX = (rc.right - rc.left) / settings.fieldSize;
+    double lenY = (rc.bottom - rc.top) / settings.fieldSize;
+
     for (int i = 0; i < settings.fieldSize; i++)
     {
         for (int j = 0; j < settings.fieldSize; j++)
@@ -219,8 +205,20 @@ void CheckWinnerCircles()
             column += (settings.arr[i * (int)settings.fieldSize + j] == CIRCLE);
             line += (settings.arr[j * (int)settings.fieldSize + i] == CIRCLE);
 
-            if (column == settings.fieldSize || line == settings.fieldSize)
+            if (line == settings.fieldSize)
             {
+                MoveToEx(hdc, rc.left + 4, rc.top + (lenY * i) + (lenY / 2), NULL);
+                LineTo(hdc, rc.left + (lenX * (settings.fieldSize)) - 4, rc.top + (lenY * i) + (lenY / 2));
+
+                win = TRUE;
+                break;
+            }
+
+            if (column == settings.fieldSize)
+            {
+                MoveToEx(hdc, rc.left + (lenX * i) + (lenX / 2), rc.top + 4, NULL);
+                LineTo(hdc, rc.left + (lenX * i) + (lenX / 2), rc.top + (lenY * settings.fieldSize) - 4);
+
                 win = TRUE;
                 break;
             }
@@ -229,8 +227,20 @@ void CheckWinnerCircles()
         count += (settings.arr[i * (int)settings.fieldSize + i] == CIRCLE);
         count2 += (settings.arr[i * (int)settings.fieldSize + ((int)settings.fieldSize - 1 - i)] == CIRCLE);
 
-        if (count == settings.fieldSize || count2 == settings.fieldSize)
+        if (count == settings.fieldSize)
         {
+            MoveToEx(hdc, rc.left + 4, rc.top + 4, NULL);
+            LineTo(hdc, rc.left + (lenX * settings.fieldSize) - 4, rc.top + (lenY * settings.fieldSize) - 4);
+
+            win = TRUE;
+            break;
+        }
+
+        if (count2 == settings.fieldSize)
+        {
+            MoveToEx(hdc, rc.left + (lenX * settings.fieldSize) - 4, rc.top + 4, NULL);
+            LineTo(hdc, rc.left + 4, rc.top + (lenY * settings.fieldSize) - 4);
+
             win = TRUE;
             break;
         }
@@ -238,6 +248,8 @@ void CheckWinnerCircles()
         column = 0;
         line = 0;
     }
+
+    DeleteObject(pen);
 
     if (win)
     {
@@ -247,7 +259,7 @@ void CheckWinnerCircles()
     }
 }
 
-void CheckWinnerCrosses()
+void CheckWinnerCrosses(HDC hdc, RECT rc)
 {
     int line = 0;
     int column = 0;
@@ -256,6 +268,12 @@ void CheckWinnerCrosses()
 
     bool win = FALSE;
 
+    HPEN pen = CreatePen(PS_SOLID, 4, settings.objectColor);
+    SelectObject(hdc, pen);
+
+    double lenX = (rc.right - rc.left) / settings.fieldSize;
+    double lenY = (rc.bottom - rc.top) / settings.fieldSize;
+
     for (int i = 0; i < settings.fieldSize; i++)
     {
         for (int j = 0; j < settings.fieldSize; j++)
@@ -263,8 +281,20 @@ void CheckWinnerCrosses()
             column += (settings.arr[i * (int)settings.fieldSize + j] == CROSS);
             line += (settings.arr[j * (int)settings.fieldSize + i] == CROSS);
 
-            if (column == settings.fieldSize || line == settings.fieldSize)
+            if (line == settings.fieldSize)
             {
+                MoveToEx(hdc, rc.left + 4, rc.top + (lenY * i) + (lenY / 2), NULL);
+                LineTo(hdc, rc.left + (lenX * (settings.fieldSize)) - 4, rc.top + (lenY * i) + (lenY / 2));
+
+                win = TRUE;
+                break;
+            }
+
+            if (column == settings.fieldSize)
+            {
+                MoveToEx(hdc, rc.left + (lenX * i) + (lenX / 2), rc.top + 4, NULL);
+                LineTo(hdc, rc.left + (lenX * i) + (lenX / 2), rc.top + (lenY * settings.fieldSize) - 4);
+
                 win = TRUE;
                 break;
             }
@@ -273,8 +303,20 @@ void CheckWinnerCrosses()
         count += (settings.arr[i * (int)settings.fieldSize + i] == CROSS);
         count2 += (settings.arr[i * (int)settings.fieldSize + ((int)settings.fieldSize - 1 - i)] == CROSS);
 
-        if (count == settings.fieldSize || count2 == settings.fieldSize)
+        if (count == settings.fieldSize)
         {
+            MoveToEx(hdc, rc.left + 4, rc.top + 4, NULL);
+            LineTo(hdc, rc.left + (lenX * settings.fieldSize) - 4, rc.top + (lenY * settings.fieldSize) - 4);
+
+            win = TRUE;
+            break;
+        }
+
+        if (count2 == settings.fieldSize)
+        {
+            MoveToEx(hdc, rc.left + (lenX * settings.fieldSize) - 4, rc.top + 4, NULL);
+            LineTo(hdc, rc.left + 4, rc.top + (lenY * settings.fieldSize) - 4);
+
             win = TRUE;
             break;
         }
@@ -282,6 +324,8 @@ void CheckWinnerCrosses()
         column = 0;
         line = 0;
     }
+
+    DeleteObject(pen);
 
     if (win)
     {
@@ -291,10 +335,10 @@ void CheckWinnerCrosses()
     }
 }
 
-void CheckGameover()
+void CheckGameover(HDC hdc, RECT rc)
 {
-    CheckWinnerCircles();
-    CheckWinnerCrosses();
+    CheckWinnerCircles(hdc, rc);
+    CheckWinnerCrosses(hdc, rc);
 
     int count = 0;
 
@@ -392,6 +436,7 @@ DWORD WINAPI DrawBackground(void* lParam) {
         }
         ResetEvent(startDraw);
     };
+
     return 0;
 }
 
@@ -423,8 +468,17 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         InvalidateRect(hwnd, &rc, TRUE);
         break;
     case WM_PAINT:
-        DrawGrid();
-        DrawObjects();
+        HDC hdc;
+        PAINTSTRUCT ps;
+
+        GetClientRect(hwnd, &rc);
+        hdc = BeginPaint(hwnd, &ps);
+
+        DrawGrid(hdc, rc);
+        DrawObjects(hdc, rc);
+        CheckGameover(hdc, rc);
+
+        EndPaint(hwnd, &ps);
         return 0;
     case WM_LBUTTONUP:
         result = WaitForSingleObject(blockWindow, 0);
@@ -449,7 +503,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
                 }
             }
-            CheckGameover();
         }
         else
             MessageBox(hwnd, _T("Another player's move"), _T("Notice"), MB_OK | MB_SETFOREGROUND | MB_APPLMODAL);
@@ -478,7 +531,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
                     PostMessage(HWND_BROADCAST, myMessage, 0, 0);
                 }
             }
-            CheckGameover();
         }
         else
             MessageBox(hwnd, _T("Another player's move"), _T("Notice"), MB_OK | MB_SETFOREGROUND | MB_APPLMODAL);
