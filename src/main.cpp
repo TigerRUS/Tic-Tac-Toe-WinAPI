@@ -10,8 +10,9 @@ using namespace std;
 
 #define CIRCLE 1
 #define CROSS 2
+#define EMPTY 0
 
-const TCHAR szWinClass[] = _T("Win32SimpleApp");
+const TCHAR szWinClass[] = _T("Tic_Tac_ToeWin32");
 const TCHAR szWinName[] = _T("Tic_Tac_Toe");
 HWND hwnd;
 HBRUSH hBrush;
@@ -76,9 +77,9 @@ void DrawGrid(HDC hdc, RECT rc)
     {
         double y = rc.bottom / settings.fieldSize;
         double x = rc.right / settings.fieldSize;
-        MoveToEx(hdc, rc.left, y * i, (LPPOINT)NULL);
+        MoveToEx(hdc, rc.left, y * i, NULL);
         LineTo(hdc, rc.right, y * i);
-        MoveToEx(hdc, x * i, rc.top, (LPPOINT)NULL);
+        MoveToEx(hdc, x * i, rc.top, NULL);
         LineTo(hdc, x * i, rc.bottom);
     }
 
@@ -145,7 +146,7 @@ bool SetEllipse(LPARAM lParam)
     double lenX = (rc.right - rc.left) / settings.fieldSize;
     double lenY = (rc.bottom - rc.top) / settings.fieldSize;
 
-    if (settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] == 0)
+    if (settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] == EMPTY)
     {
         settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] = CIRCLE;
 
@@ -169,7 +170,7 @@ bool SetCross(LPARAM lParam)
     double lenX = (rc.right - rc.left) / settings.fieldSize;
     double lenY = (rc.bottom - rc.top) / settings.fieldSize;
 
-    if (settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] == 0)
+    if (settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] == EMPTY)
     {
         settings.arr[(int)(LOWORD(lParam) / lenX) * (int)settings.fieldSize + (int)(HIWORD(lParam) / lenY)] = CROSS;
 
@@ -346,7 +347,7 @@ void CheckGameover(HDC hdc, RECT rc)
     {
         for (int j = 0; j < settings.fieldSize; j++)
         {
-            count += (settings.arr[i * (int)settings.fieldSize + j] != 0);
+            count += (settings.arr[i * (int)settings.fieldSize + j] != EMPTY);
         }
     }
 
