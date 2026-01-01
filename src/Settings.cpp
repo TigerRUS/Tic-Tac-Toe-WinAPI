@@ -1,32 +1,30 @@
 #include "Settings.h"
 
-using namespace std;
-
 const char* config_file = "Config.txt";
 
-void SetParam(string line, Settings* settings)
+void SetParam(std::string line, Settings* settings)
 {
     size_t pos;
     int r, g, b;
 
     pos = line.find("=");
 
-    if (line.find("FieldSize") != string::npos)
+    if (line.find("FieldSize") != std::string::npos)
         settings->fieldSize = stoi(line.substr(pos + 1));
 
-    else if (line.find("WindowWidth") != string::npos)
+    else if (line.find("WindowWidth") != std::string::npos)
         settings->width = stoi(line.substr(pos + 1));
 
-    else if (line.find("WindowHeight") != string::npos)
+    else if (line.find("WindowHeight") != std::string::npos)
         settings->height = stoi(line.substr(pos + 1));
 
-    else if (line.find("BackgroundColor") != string::npos)
+    else if (line.find("BackgroundColor") != std::string::npos)
     {
-        string color = line.substr(pos + 1);
+        std::string color = line.substr(pos + 1);
         color.erase(0, color.find("(") + 1);
         color.erase(color.find(")"), 1);
 
-        r = stoi(color.substr(0, color.find(",")));
+        r = std::stoi(color.substr(0, color.find(",")));
         color.erase(0, color.find(",") + 1);
 
         g = stoi(color.substr(0, color.find(",")));
@@ -37,13 +35,13 @@ void SetParam(string line, Settings* settings)
         settings->BGColor = RGB(r, g, b);
     }
 
-    else if (line.find("GridColor") != string::npos)
+    else if (line.find("GridColor") != std::string::npos)
     {
-        string color = line.substr(pos + 1);
+        std::string color = line.substr(pos + 1);
         color.erase(0, color.find("(") + 1);
         color.erase(color.find(")"), 1);
 
-        r = stoi(color.substr(0, color.find(",")));
+        r = std::stoi(color.substr(0, color.find(",")));
         color.erase(0, color.find(",") + 1);
 
         g = stoi(color.substr(0, color.find(",")));
@@ -68,7 +66,7 @@ void ReadFile1(Settings* settings)
 
     if (hFile == INVALID_HANDLE_VALUE)
     {
-        cout << "Config file not found" << endl;
+        std::cout << "Config file not found" << std::endl;
         return;
     }
 
@@ -82,7 +80,7 @@ void ReadFile1(Settings* settings)
 
     if (hMap == NULL)
     {
-        cout << "CreateFileMapping error: " << GetLastError();
+        std::cout << "CreateFileMapping error: " << GetLastError();
         CloseHandle(hFile);
         return;
     }
@@ -96,14 +94,14 @@ void ReadFile1(Settings* settings)
 
     if (ptrFileMap == NULL)
     {
-        cout << "MapViewOfFile error: " << GetLastError();
+        std::cout << "MapViewOfFile error: " << GetLastError();
         CloseHandle(hMap);
         CloseHandle(hFile);
         return;
     }
     else
     {
-        string line = "";
+        std::string line = "";
         size_t pos;
         int r, g, b;
 
@@ -141,7 +139,7 @@ void ReadFile2(Settings* settings)
         fseek(file, 0, SEEK_SET);
         fread(buffer, sizeof(char), len, file);
 
-        string line = "";
+        std::string line = "";
         size_t pos;
         int r, g, b;
 
@@ -162,27 +160,27 @@ void ReadFile2(Settings* settings)
         fclose(file);
     }
     else
-        cout << "Config file not found" << endl;
+        std::cout << "Config file not found" << std::endl;
 }
 
 void ReadFile3(Settings* settings) {
-    ifstream file(config_file);
+    std::ifstream file(config_file);
 
     if (file.is_open())
     {
-        string line;
+        std::string line;
         size_t pos;
         int r, g, b;
 
         while (!file.eof())
         {
-            getline(file, line);
+            std::getline(file, line);
             SetParam(line, settings);
         }
     }
     else
     {
-        cout << "Config file not found" << endl;
+        std::cout << "Config file not found" << std::endl;
     }
     file.close();
 }
@@ -199,7 +197,7 @@ void ReadFile4(Settings* settings) {
 
     if (hFile == INVALID_HANDLE_VALUE)
     {
-        cout << "Config file not found" << endl;
+        std::cout << "Config file not found" << std::endl;
         return;
     }
     else
@@ -209,7 +207,7 @@ void ReadFile4(Settings* settings) {
 
         ReadFile(hFile, buffer, 256, &bytesRead, NULL);
 
-        string line = "";
+        std::string line = "";
         size_t pos;
         int r, g, b;
 
@@ -230,9 +228,13 @@ void ReadFile4(Settings* settings) {
     }
 }
 
-string CreateParamLine(Settings* settings)
+std::string CreateParamLine(Settings* settings)
 {
-    string str = "WindowWidth=" + to_string(settings->width) + "\nWindowHeight=" + to_string(settings->height) + "\nFieldSize=" + to_string((int)settings->fieldSize) + "\nBackgroundColor=RGB(" + to_string(GetRValue(settings->BGColor)) + ", " + to_string(GetGValue(settings->BGColor)) + ", " + to_string(GetBValue(settings->BGColor)) + ")\n" + "GridColor=RGB(" + to_string(GetRValue(settings->gridColor)) + ", " + to_string(GetGValue(settings->gridColor)) + ", " + to_string(GetBValue(settings->gridColor)) + ")";
+    std::string str = "WindowWidth=" + std::to_string(settings->width) + "\nWindowHeight=" + std::to_string(settings->height) + 
+        "\nFieldSize=" + std::to_string((int)settings->fieldSize) + "\nBackgroundColor=RGB(" + std::to_string(GetRValue(settings->BGColor)) + 
+        ", " + std::to_string(GetGValue(settings->BGColor)) + ", " + std::to_string(GetBValue(settings->BGColor)) + ")\n" + "GridColor=RGB(" + 
+        std::to_string(GetRValue(settings->gridColor)) + ", " + std::to_string(GetGValue(settings->gridColor)) + ", " + 
+        std::to_string(GetBValue(settings->gridColor)) + ")";
     return str;
 }
 
@@ -247,12 +249,12 @@ void WriteFile1(Settings* settings)
         FILE_ATTRIBUTE_NORMAL,      // normal file
         0);
 
-    string str = CreateParamLine(settings);
+    std::string str = CreateParamLine(settings);
     const char* buffer = str.c_str();
 
     if (hFile == INVALID_HANDLE_VALUE)
     {
-        cout << "CreateFile error: " << GetLastError() << endl;
+        std::cout << "CreateFile error: " << GetLastError() << std::endl;
         return;
     }
 
@@ -266,7 +268,7 @@ void WriteFile1(Settings* settings)
 
     if (hMap == NULL)
     {
-        cout << "CreateFileMapping error: " << GetLastError() << endl;
+        std::cout << "CreateFileMapping error: " << GetLastError() << std::endl;
         CloseHandle(hFile);
         return;
     }
@@ -280,7 +282,7 @@ void WriteFile1(Settings* settings)
 
     if (ptrFileMap == NULL)
     {
-        cout << "MapViewOfFile error: " << GetLastError() << endl;
+        std::cout << "MapViewOfFile error: " << GetLastError() << std::endl;
         CloseHandle(hMap);
         CloseHandle(hFile);
         return;
@@ -300,7 +302,7 @@ void WriteFile2(Settings* settings)
     FILE* file;
     if (fopen_s(&file, config_file, "w") == 0)
     {
-        string str = CreateParamLine(settings);
+        std::string str = CreateParamLine(settings);
         const char* buffer = str.c_str();
 
         fwrite(buffer, sizeof(buffer[0]), strlen(buffer), file);
@@ -308,11 +310,11 @@ void WriteFile2(Settings* settings)
         fclose(file);
     }
     else
-        cout << GetLastError() << endl;
+        std::cout << GetLastError() << std::endl;
 }
 
 void WriteFile3(Settings* settings) {
-    ofstream file(config_file);
+    std::ofstream file(config_file);
 
     if (file.is_open())
     {
@@ -321,7 +323,7 @@ void WriteFile3(Settings* settings) {
         file.close();
     }
     else
-        cout << "Error: " << GetLastError() << endl;
+        std::cout << "Error: " << GetLastError() << std::endl;
 }
 
 void WriteFile4(Settings* settings) {
@@ -336,14 +338,14 @@ void WriteFile4(Settings* settings) {
 
     if (hFile == INVALID_HANDLE_VALUE)
     {
-        cout << "Config file not found" << endl;
+        std::cout << "Config file not found" << std::endl;
         return;
     }
     else
     {
         DWORD bytesRead = 0;
 
-        string str = CreateParamLine(settings);
+        std::string str = CreateParamLine(settings);
         const char* buffer = str.c_str();
 
         WriteFile(hFile, buffer, strlen(buffer), NULL, NULL);

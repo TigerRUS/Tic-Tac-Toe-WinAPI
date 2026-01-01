@@ -1,16 +1,14 @@
 #include "Settings.h"
 #include "tchar.h"
 
-using namespace std;
-
 #define KEY_SHIFTED     0x8000
 #define KEY_TOGGLED     0x0001
 
 #define KEY_Q     0x51
 
+#define EMPTY 0
 #define CIRCLE 1
 #define CROSS 2
-#define EMPTY 0
 
 const TCHAR szWinClass[] = _T("Tic_Tac_ToeWin32");
 const TCHAR szWinName[] = _T("Tic_Tac_Toe");
@@ -579,7 +577,7 @@ int main(int argc, char* argv[])
 
     /* Getting arguments from command line (format: --fileMode=1 --fieldSize=2) */
     size_t pos;
-    string str;
+    std::string str;
 
     for (int i = 0; i < argc; i++)
     {
@@ -587,7 +585,7 @@ int main(int argc, char* argv[])
     }
 
     pos = str.find("--fileMode=");
-    if (pos != string::npos)
+    if (pos != std::string::npos)
     {
         fileMode = stoi(str.substr(pos + 11));
     }
@@ -595,14 +593,14 @@ int main(int argc, char* argv[])
     ReadConfigFromFile(fileMode, &settings);
 
     pos = str.find("--fieldSize=");
-    if (pos != string::npos)
+    if (pos != std::string::npos)
     {
         settings.fieldSize = stoi(str.substr(pos + 12));
     }
 
     if (settings.fieldSize <= 0)
     {
-        cout << "Wrong field size";
+        std::cout << "Wrong field size";
         exit(100);
     }
 
@@ -617,7 +615,7 @@ int main(int argc, char* argv[])
 
     if (hMapFile == NULL)
     {
-        cout << "CreateFileMapping error: " << GetLastError() << endl;
+        std::cout << "CreateFileMapping error: " << GetLastError() << std::endl;
         return 100;
     }
 
@@ -708,19 +706,19 @@ int main(int argc, char* argv[])
     drawThread = CreateThread(NULL, 0, DrawBackground, (void*)hwnd, 0, NULL);
     if (drawThread == NULL)
     {
-        cout << "CreateThread error: " << GetLastError() << endl;
+        std::cout << "CreateThread error: " << GetLastError() << std::endl;
         return 0;
     }
     startDraw = CreateEvent(NULL, TRUE, FALSE, NULL);
     if (startDraw == NULL)
     {
-        cout << "CreateEvent error: " << GetLastError() << endl;
+        std::cout << "CreateEvent error: " << GetLastError() << std::endl;
         return 0;
     }
     blockWindow = CreateMutex(NULL, FALSE, TEXT("NameOfMutexObject"));
     if (blockWindow == NULL)
     {
-        cout << "CreateMutex error: " << GetLastError() << endl;
+        std::cout << "CreateMutex error: " << GetLastError() << std::endl;
         return 0;
     }
 
