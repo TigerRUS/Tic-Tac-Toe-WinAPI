@@ -15,7 +15,7 @@ const TCHAR szWinName[] = _T("Tic_Tac_Toe");
 HWND hwnd;
 HBRUSH hBrush;
 
-UINT myMessage = RegisterWindowMessageW(L"MyMessage");
+UINT broadcastMessage = RegisterWindowMessageW(L"Draw");
 UINT closeMessage = RegisterWindowMessageW(L"Win");
 
 HANDLE drawThread;
@@ -446,7 +446,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
     DWORD result;
 
-    if (message == myMessage)
+    if (message == broadcastMessage)
     {
         InvalidateRect(hwnd, NULL, TRUE);
     }
@@ -491,7 +491,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
                 if (SetEllipse(lParam))
                 {
                     ptrService->move = CROSS;
-                    PostMessage(HWND_BROADCAST, myMessage, 0, 0);
+                    PostMessage(HWND_BROADCAST, broadcastMessage, 0, 0);
                 }
             }
             else
@@ -499,7 +499,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
                 if (SetCross(lParam))
                 {
                     ptrService->move = CIRCLE;
-                    PostMessage(HWND_BROADCAST, myMessage, 0, 0);
+                    PostMessage(HWND_BROADCAST, broadcastMessage, 0, 0);
                 }
             }
         }
@@ -519,7 +519,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
                 if (SetEllipse(lParam))
                 {
                     ptrService->move = CROSS;
-                    PostMessage(HWND_BROADCAST, myMessage, 0, 0);
+                    PostMessage(HWND_BROADCAST, broadcastMessage, 0, 0);
                 }
             }
             else
@@ -527,7 +527,7 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
                 if (SetCross(lParam))
                 {
                     ptrService->move = CIRCLE;
-                    PostMessage(HWND_BROADCAST, myMessage, 0, 0);
+                    PostMessage(HWND_BROADCAST, broadcastMessage, 0, 0);
                 }
             }
         }
