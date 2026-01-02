@@ -16,7 +16,7 @@ HWND hwnd;
 HBRUSH hBrush;
 
 UINT broadcastMessage = RegisterWindowMessageW(L"Draw");
-UINT closeMessage = RegisterWindowMessageW(L"Win");
+UINT closeMessage = RegisterWindowMessageW(L"Finish");
 
 HANDLE drawThread;
 HANDLE startDraw;
