@@ -3,7 +3,6 @@
 
 #define KEY_SHIFTED     0x8000
 #define KEY_TOGGLED     0x0001
-
 #define KEY_Q     0x51
 
 #define EMPTY 0
@@ -12,6 +11,7 @@
 
 const TCHAR szWinClass[] = _T("Tic_Tac_ToeWin32");
 const TCHAR szWinName[] = _T("Tic_Tac_Toe");
+
 HWND hwnd;
 HBRUSH hBrush;
 
@@ -24,7 +24,6 @@ BOOL gradientIsDrawing = FALSE;
 
 HANDLE blockWindow;
 
-/* service info to write into shared memory */
 struct Service
 {
     int count;
@@ -34,18 +33,18 @@ struct Service
 Service* ptrService;
 Settings settings;
 
-int figure = CIRCLE; // first window will use circles
+int figure = CIRCLE; // first window uses circles
 
-/* gradient brash parameters */
-double gradientFirstParam = 1;
-double gradientSecondParam = 250;
+double gradientOffset1 = 1;
+double gradientOffset2 = 250;
 double gradientRatio = 500;
 
-void ChangeBGColor(short a, int R, int G, int B)
+void ChangeBGColor(short a, uint8_t R, uint8_t G, uint8_t B)
 {
     RECT rc;
     GetClientRect(hwnd, &rc);
-    if (a > 0)
+
+    if (a >= 0)
     {
         if (R < 255)
             settings.gridColor = RGB(R += 5, G, B);
@@ -54,7 +53,7 @@ void ChangeBGColor(short a, int R, int G, int B)
         else if (B < 255)
             settings.gridColor = RGB(R, G, B += 5);
     }
-    else if (a < 0)
+    else
     {
         if (R > 0)
             settings.gridColor = RGB(R -= 5, G, B);
@@ -63,6 +62,7 @@ void ChangeBGColor(short a, int R, int G, int B)
         else if (B > 0)
             settings.gridColor = RGB(R, G, B -= 5);
     }
+
     InvalidateRect(hwnd, &rc, TRUE);
 }
 
@@ -364,35 +364,40 @@ HBRUSH CreateGradientBrush(COLORREF top, COLORREF bottom)
 
     RECT clientRect;
     GetClientRect(hwnd, &clientRect);
+
     int width = clientRect.right - clientRect.left;
     int height = clientRect.bottom - clientRect.top;
-    HBRUSH Brush = NULL;
+    HBRUSH brush = NULL;
 
     HDC hdcmem = CreateCompatibleDC(hdc);
     HBITMAP hbitmap = CreateCompatibleBitmap(hdc, width, height);
 
     SelectObject(hdcmem, hbitmap);
 
-    int r1 = GetRValue(top), r2 = GetRValue(bottom), g1 = GetGValue(top), g2 = GetGValue(bottom), b1 = GetBValue(top), b2 = GetBValue(bottom);
+    uint8_t rTop = GetRValue(top);
+    uint8_t rBottom = GetRValue(bottom);
+    uint8_t gTop = GetGValue(top); 
+    uint8_t gBottom = GetGValue(bottom);
+    uint8_t bTop = GetBValue(top);
+    uint8_t bBottom = GetBValue(bottom);
+    
     for (int i = 0; i < height; i++)
     {
-        RECT temp;
-        int r, g, b;
-        r = int(r1 + double(i * (r2 - r1) / height));
-        g = int(g1 + double(i * (g2 - g1) / height));
-        b = int(b1 + double(i * (b2 - b1) / height));
-        Brush = CreateSolidBrush(RGB(r, g, b));
-        temp.left = 0;
-        temp.top = i;
-        temp.right = width;
-        temp.bottom = i + 1;
-        FillRect(hdcmem, &temp, Brush);
-        DeleteObject(Brush);
+        brush = CreateSolidBrush(RGB(uint8_t(rTop + (i * (rBottom - rTop) / height)), uint8_t(gTop + (i * (gBottom - gTop) / height)), uint8_t(bTop + (i * (bBottom - bTop) / height))));
+        
+        clientRect.left = 0;
+        clientRect.top = i;
+        clientRect.right = width;
+        clientRect.bottom = i + 1;
+
+        FillRect(hdcmem, &clientRect, brush);
+        DeleteObject(brush);
     }
+
     HBRUSH pattern = CreatePatternBrush(hbitmap);
     
     DeleteDC(hdcmem);
-    DeleteObject(Brush);
+    DeleteObject(brush);
     DeleteObject(hbitmap);
     ReleaseDC(hwnd, hdc);
 
@@ -400,21 +405,25 @@ HBRUSH CreateGradientBrush(COLORREF top, COLORREF bottom)
 }
 
 uint32_t rgb(double ratio)
-{   
+{
     int normalized = int(ratio * 256 * 6);
     int region = normalized / 256;
     int x = normalized % 256;
 
-    uint8_t r = 0, g = 0, b = 0;
+    uint8_t r = 0;
+    uint8_t g = 0;
+    uint8_t b = 0;
+
     switch (region)
     {
-    case 0: r = 255; g = 0;   b = 0;   g += x; break;
-    case 1: r = 255; g = 255; b = 0;   r -= x; break;
-    case 2: r = 0;   g = 255; b = 0;   b += x; break;
-    case 3: r = 0;   g = 255; b = 255; g -= x; break;
-    case 4: r = 0;   g = 0;   b = 255; r += x; break;
-    case 5: r = 255; g = 0;   b = 255; b -= x; break;
+        case 0: r = 255; g = 0;   b = 0;   g += x; break;
+        case 1: r = 255; g = 255; b = 0;   r -= x; break;
+        case 2: r = 0;   g = 255; b = 0;   b += x; break;
+        case 3: r = 0;   g = 255; b = 255; g -= x; break;
+        case 4: r = 0;   g = 0;   b = 255; r += x; break;
+        case 5: r = 255; g = 0;   b = 255; b -= x; break;
     }
+
     return r + (g << 8) + (b << 16);
 }
 
@@ -425,14 +434,15 @@ DWORD WINAPI DrawBackground(void* lParam) {
 
         while (gradientIsDrawing)
         {
-            DeleteObject((HBRUSH)SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG)CreateGradientBrush(rgb(gradientFirstParam / gradientRatio), rgb(gradientSecondParam / gradientRatio))));
+            DeleteObject((HBRUSH)SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG)CreateGradientBrush(rgb(gradientOffset1 / gradientRatio), rgb(gradientOffset2 / gradientRatio))));
             InvalidateRect(hwnd, NULL, TRUE);
 
             Sleep(30);
 
-            if (++gradientFirstParam == gradientRatio) gradientFirstParam = 1;
-            if (++gradientSecondParam == gradientRatio) gradientSecondParam = 1;
+            if (++gradientOffset1 == gradientRatio) gradientOffset1 = 1;
+            if (++gradientOffset2 == gradientRatio) gradientOffset2 = 1;
         }
+
         ResetEvent(startDraw);
     };
 
@@ -443,7 +453,6 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 {
     RECT rc;
     RECT wrc;
-
     DWORD result;
 
     if (message == broadcastMessage)
@@ -463,7 +472,10 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         settings.height = wrc.bottom - wrc.top;
 
         GetClientRect(hwnd, &rc);
-        DeleteObject((HBRUSH)SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG)CreateGradientBrush(rgb(gradientFirstParam / gradientRatio), rgb(gradientSecondParam / gradientRatio))));
+        if (gradientIsDrawing)
+        {
+            DeleteObject((HBRUSH)SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG)CreateGradientBrush(rgb(gradientOffset1 / gradientRatio), rgb(gradientOffset2 / gradientRatio))));
+        }
         InvalidateRect(hwnd, &rc, TRUE);
         break;
     case WM_PAINT:
@@ -625,7 +637,7 @@ int main(int argc, char* argv[])
         0,
         sizeof(int) * settings.fieldSize * settings.fieldSize + sizeof(Service));
 
-    /* write service info to shared memory */
+    /* write service info into shared memory */
     ptrService = (Service*)ptrMap + (int)(sizeof(int) * settings.fieldSize * settings.fieldSize);
 
     if (GetLastError() != ERROR_ALREADY_EXISTS)
