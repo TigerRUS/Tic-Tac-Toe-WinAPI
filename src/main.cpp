@@ -1,13 +1,13 @@
 #include "Settings.h"
-#include "tchar.h"
+#include <tchar.h>
 
 #define KEY_SHIFTED     0x8000
 #define KEY_TOGGLED     0x0001
-#define KEY_Q     0x51
+#define KEY_Q           0x51
 
-#define EMPTY 0
-#define CIRCLE 1
-#define CROSS 2
+#define EMPTY   0
+#define CIRCLE  1
+#define CROSS   2
 
 const TCHAR szWinClass[] = _T("Tic_Tac_ToeWin32");
 const TCHAR szWinName[] = _T("Tic_Tac_Toe");
@@ -39,11 +39,8 @@ double gradientOffset1 = 1;
 double gradientOffset2 = 250;
 double gradientRatio = 500;
 
-void ChangeBGColor(short a, uint8_t R, uint8_t G, uint8_t B)
+void ChangeGridColor(short a, uint8_t R, uint8_t G, uint8_t B)
 {
-    RECT rc;
-    GetClientRect(hwnd, &rc);
-
     if (a >= 0)
     {
         if (R < 255)
@@ -62,8 +59,6 @@ void ChangeBGColor(short a, uint8_t R, uint8_t G, uint8_t B)
         else if (B > 0)
             settings.gridColor = RGB(R, G, B -= 5);
     }
-
-    InvalidateRect(hwnd, &rc, TRUE);
 }
 
 void DrawGrid(HDC hdc, RECT rc)
@@ -408,7 +403,7 @@ uint32_t rgb(double ratio)
 {
     int normalized = int(ratio * 256 * 6);
     int region = normalized / 256;
-    int x = normalized % 256;
+    uint8_t x = normalized % 256;
 
     uint8_t r = 0;
     uint8_t g = 0;
@@ -548,16 +543,14 @@ LRESULT CALLBACK WindowProcedure(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
         ReleaseMutex(blockWindow);
         return 0;
     case WM_MOUSEWHEEL:
-        ChangeBGColor(GET_WHEEL_DELTA_WPARAM(wParam), GetRValue(settings.gridColor), GetGValue(settings.gridColor), GetBValue(settings.gridColor));
+        GetClientRect(hwnd, &rc);
+        ChangeGridColor(GET_WHEEL_DELTA_WPARAM(wParam), GetRValue(settings.gridColor), GetGValue(settings.gridColor), GetBValue(settings.gridColor));
+        InvalidateRect(hwnd, &rc, TRUE);
         return 0;
     case WM_KEYDOWN:
         if (wParam == VK_RETURN)
         {
-            settings.BGColor = RGB(
-                rand() % 256,
-                rand() % 256,
-                rand() % 256
-            );
+            settings.BGColor = RGB(rand() % 256, rand() % 256, rand() % 256);
             GetClientRect(hwnd, &rc);
             DeleteObject((HBRUSH)SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG)CreateSolidBrush(settings.BGColor)));
             InvalidateRect(hwnd, &rc, TRUE);
